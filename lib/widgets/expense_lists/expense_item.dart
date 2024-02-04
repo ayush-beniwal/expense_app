@@ -13,7 +13,7 @@ class ExpenseItem extends StatelessWidget {
       //using the card widget to get a card like feel for our expense item
       child: Padding(
         //wrapping our column with a padding widget
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        padding: const EdgeInsets.fromLTRB(16,60,16,16), //left top right bottom
         child: Column(
           //column with children as title, and then a size box, then a row of info
           children: [

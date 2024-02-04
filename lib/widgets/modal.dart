@@ -2,6 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:expense_app/models/expense.dart'; //imported to use intl
 
 class NewExpense extends StatefulWidget {
+  const NewExpense({super.key, required this.onAddExpense});
+
+  final void Function(SingleExpense expense)
+      onAddExpense; //accepting a function as a value to
+  //add new expenses.
+
+  @override
   State<NewExpense> createState() {
     return _NewExpenseState();
   }
@@ -10,8 +17,7 @@ class NewExpense extends StatefulWidget {
 class _NewExpenseState extends State<NewExpense> {
   // var _enteredTitle = '';
   // void _saveTitleInput(String inputValue) {
-  //   _enteredTitle =
-  //       inputValue; //no need to use setstate as the UI does not update
+  //   _enteredTitle = inputValue; //no need to use setstate as the UI does not update
   // } //we use this function with text field onChanged, and it recieves the input
   // string each time
   final _titleController =
@@ -35,16 +41,57 @@ class _NewExpenseState extends State<NewExpense> {
     setState(() {
       _selectedDate = pickedDate; //only done after waiting for pickedDate
     });
-    //the showDatePicker returns a Future object. which
+    //the showDatePicker returns a Future object, which
     //is a special type of object, and stores a value which we dont have yet, but
     //will get later. It is returned by the showDatePicker, and can be accessed by
-    //using a special method called the, which takes a anonymous fn.
+    //using a special method called then((value)=>null), which takes a anonymous fn.
     //A more convinient method we will use here, is using the async  await keyword
     //we add async in front of the parentheses of the fn, and await in front of the
     //code which returns the future
     //we can then store it as a value in a variable, using await.
     //What this will do, is basically wait till we get that value, and the code after
-    //the function will only be executed once we get that value
+    //the await keyword will only be executed once we get that value
+  }
+
+  void _submitExpenseData() {
+    final enteredAmount = double.tryParse(_amountController.text);
+    //tryParse tries to convert a string to int, else returns null
+    final amountIsInvalid = (enteredAmount == null || enteredAmount <= 0);
+    if (_titleController.text.trim().isEmpty ||
+        amountIsInvalid ||
+        _selectedDate == null)
+    //trim removes whitespace in front and end
+    {
+      showDialog(
+        //show a diaglog if input is invalid
+        context: context, //context passed in by flutter
+        builder: (ctx) => AlertDialog(
+          //builder which returns a alertDialog widget
+          title: const Text("Invalid input"),
+          content: const Text("Please enter valid title, amount and date"),
+          actions: [
+            TextButton(
+                onPressed: () {
+                  Navigator.pop(
+                      ctx); //closing the alert diaglog ( using the ctx )
+                },
+                child: const Text('Oay'))
+          ], //remember , ctx is the context of the alert dialog, and context of entire
+          //modal
+        ),
+      );
+      //showing error messages after validating
+      return;
+    }
+    widget.onAddExpense(SingleExpense(
+        //using widget.function to access functions given in parent state class
+        // remember this can only be done inside another method, not in the class directly.
+        title: _titleController.text,
+        amount: enteredAmount,
+        date: _selectedDate!,
+        category:
+            _selectedCaterogy)); //inputting the values we have to add an expense
+    Navigator.pop(context); // to close the overlay
   }
 
   @override
@@ -63,15 +110,15 @@ class _NewExpenseState extends State<NewExpense> {
         child: Column(
           children: [
             TextField(
-              //A built in widget for text entry
-              // onChanged: _saveTitleInput, This is one way to save input text,
-              //by calling onChanged each time the user enters a keystroke
+              // A built in widget for text entry
+              // onChanged: _saveTitleInput, //This is one way to save input text,
+              // by calling onChanged each time the user enters a keystroke
               controller: _titleController,
               maxLength: 50,
               decoration:
                   const InputDecoration(label: Text("Title")), //to add label
-              //we use decoration argument, and set it to InputDecoration & set label inside
-              //it
+              //we use decoration argument, and set it to InputDecoration &
+              //set label inside it
             ),
             Row(
               children: [
@@ -84,7 +131,8 @@ class _NewExpenseState extends State<NewExpense> {
                     maxLength: 10,
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(
-                        prefixText: '\$', //adds a prefix text to the field
+                        prefixText: '\$',
+                        //adds a pre text to the field
                         //(we are escaping the dollar with the backslash, as dollar is a special character)
                         label: Text("Enter Amount")),
                   ),
@@ -92,17 +140,18 @@ class _NewExpenseState extends State<NewExpense> {
                 const SizedBox(width: 16),
                 Expanded(
                     child: Row(
-                  mainAxisAlignment:
-                      MainAxisAlignment.end, //sets where items start from
+                  mainAxisAlignment: MainAxisAlignment
+                      .end, //sets where items start from along axis
                   crossAxisAlignment:
                       CrossAxisAlignment.center, // vertical centering
                   children: [
                     Text(_selectedDate == null
                         ? "No Date Selected"
-                        : formatter.format(
-                            _selectedDate!)), //Here, we are setting text as No Date
-                    //Selected if it is null, else using formatted to show the selected date.
-                    // we use the exclamation mark to tell dart, that the value won't be null
+                        : formatter.format(_selectedDate!)),
+                    //Here, we are setting text as No Date Selected if it is null,
+                    // else using formatted to show the selected date.
+                    // we use the exclamation mark to tell dart,
+                    // that the value won't be null (again use exclamation)
 
                     IconButton(
                         onPressed: _presentDatePicker,
@@ -116,31 +165,33 @@ class _NewExpenseState extends State<NewExpense> {
                 DropdownButton(
                     //to select a catergry
                     value:
-                        _selectedCaterogy, //setting the value of the drop down
-                    items: Category.values //items which are to be displayed
-                        .map(
-                          (category) => DropdownMenuItem(
-                            value: category, //this is the value that we send to onChanged
-                            child: Text(
-                              category.name.toUpperCase(), //name used to convert enum to string
-                            ),
-                          ),
-                        )
+                        _selectedCaterogy, //setting the initial value (changed later)
+                    items: Category.values
+                        .map(//items which are to be displayed
+                            (category) => DropdownMenuItem(
+                                value:
+                                    category, //this is the value that we send to onChanged
+                                child: Text(
+                                  category.name
+                                      .toUpperCase(), //name used to convert enum to string
+                                )))
                         .toList(),
-                    //Drop downbutton expects a list of dropdownmenuitems. 
-                    //We can convert list of one type to another via map. 
-                    //use the map method again, to convert the Category.values enum (which gives)
-                    //us a list, to values of DropdownmenuItem. 
+                    //Drop downbutton expects a list of dropdownmenuitems.
+                    //We can convert list of one type to another via map.
+                    //use the map method again, to convert the Category.values which gives
+                    //us a list of our enum values, to values of DropdownmenuItem.
                     //Map wants a function which will be executed for each item
-                    //The method recieves a value which
-                    //is simply catergory, (for each enum value) and a function which returns a
-                    //drop down menu item. in the argument for dropdownmenuitem, we set value
+                    //The method recieves a value for each item in the original list, which
+                    //is simply catergory, (for each enum value) and the function will return a
+                    //drop down menu item. In the named argument for dropdownmenuitem, we set value
                     //as catergory, child as text and call name method on catergory to get its value
                     // We set the value as category, so that flutter knows what sort of value it is
                     //dealing with when we press onChanged.
                     onChanged: (value) {
-                      setState(() {  //we set the state to show the current value if its changed
-                        if (value == null) { //ensuring value is not null
+                      setState(() {
+                        //we set the state to show the current value if its changed
+                        if (value == null) {
+                          //ensuring value is not null
                           return;
                         }
                         _selectedCaterogy = value;
@@ -149,12 +200,12 @@ class _NewExpenseState extends State<NewExpense> {
                 const Spacer(),
                 TextButton(
                     onPressed: () {
-                      Navigator.pop(
-                          context); //simply removes overlay from screen
-                    },
+                      Navigator.pop(context);
+                    }, //simply removes overlay from screen
                     child: const Text("Close")),
                 ElevatedButton(
-                    onPressed: () {}, child: const Text("Save Expense")),
+                    onPressed: _submitExpenseData,
+                    child: const Text("Save Expense")),
               ],
             )
           ],
