@@ -23,7 +23,8 @@ class SingleExpense {
     required this.amount,
     required this.date,
     required this.category,
-  }) : id = uuid.v4(); //initializing a default id using uuid package, done in this way
+  }) : id = uuid
+            .v4(); //initializing a default id using uuid package, done in this way
 // writing the same code without using the this keyword
 //   Expenses({
 //     required String title,
@@ -46,6 +47,31 @@ class SingleExpense {
   String get formattedDate {
     //just defined a getter.
     return formatter.format(date);
-     //using the format method on date, via the formatter obj
+    //using the format method on date, via the formatter obj
+  }
+}
+
+class ExpenseBucket {
+  //making a model for our chart
+  ExpenseBucket(
+      {required this.category,
+      required this.expenses}); //base constructor function
+  ExpenseBucket.forCategory(List<SingleExpense> allExpenses,
+      this.category) //another constructor function, when we
+      //wish to return expenses for a specififc catergorry
+      : expenses = allExpenses
+            .where((expense) => expense.category == category)
+            .toList();
+  //using an initializer list to set expenses variable equal to allExpenses, but using where to filter
+  //the list for items whose category matches the given category, finally converting it to list;
+  final Category category;
+  final List<SingleExpense> expenses;
+
+  double get totalExpenses {
+    double sum = 0;
+    for (final expense in expenses) {
+      sum += expense.amount;
+    }
+    return sum;
   }
 }

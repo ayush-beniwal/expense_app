@@ -6,9 +6,12 @@ import 'package:expense_app/models/expense.dart';
 class ExpensesList extends StatelessWidget {
   //stateless widget defination
   ExpensesList(
-      {super.key, required this.expenses, required this.removeExpense}); //constructor for the class
+      {super.key,
+      required this.expenses,
+      required this.removeExpense}); //constructor for the class
   final List<SingleExpense> expenses; //list of expenses
-  final void Function(SingleExpense expense) removeExpense; //syntax for declaring function as a property
+  final void Function(SingleExpense expense)
+      removeExpense; //syntax for declaring function as a property
   @override
   Widget build(context) {
     return ListView.builder(
@@ -19,8 +22,13 @@ class ExpensesList extends StatelessWidget {
       // we also define a itemcount argument to tell how many items does it need to build
       itemCount: expenses.length,
       itemBuilder: (ctx, index) => Dismissible(
+          background: Container(
+            color: Theme.of(context).colorScheme.error.withOpacity(0.2),
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+          ),
           key: ValueKey(expenses[index]),
-          onDismissed: (direction) { //cant point at it directly, as onDissmised passes a direction as well
+          onDismissed: (direction) {
+            //cant point at it directly, as onDissmised passes a direction as well
             removeExpense(expenses[index]);
           },
           child: ExpenseItem(
