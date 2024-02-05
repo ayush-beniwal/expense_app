@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:expense_app/widgets/expenses.dart';
+// import 'package:flutter/services.dart'; //can use this to lock the screen orientation to the one we want
 
 var kColorScheme = //convention to define global variables starting with k
     ColorScheme.fromSeed(
@@ -11,6 +12,11 @@ var kDarkColorScheme = ColorScheme.fromSeed(
     brightness: Brightness.dark, //tells flutter we are building for dark theme
     seedColor: const Color.fromARGB(255, 5, 99, 125));
 void main() {
+  // WidgetsFlutterBinding.ensureInitialized();
+  // SystemChrome.setPreferredOrientations([  //we can use this code to lock the orientation of the device.
+  // Set preferred orientations gives a futures object, and we call the then method on it again
+  //   DeviceOrientation.portraitUp,
+  // ]).then((fn) {
   runApp(MaterialApp(
     darkTheme: ThemeData.dark().copyWith(
       colorScheme: kDarkColorScheme,
@@ -42,4 +48,5 @@ void main() {
                   fontSize: 16),
             )),
   ));
+  // });
 }

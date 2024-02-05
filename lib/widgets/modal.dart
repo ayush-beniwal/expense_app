@@ -105,111 +105,127 @@ class _NewExpenseState extends State<NewExpense> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-        child: Column(
-          children: [
-            TextField(
-              // A built in widget for text entry
-              // onChanged: _saveTitleInput, //This is one way to save input text,
-              // by calling onChanged each time the user enters a keystroke
-              controller: _titleController,
-              maxLength: 50,
-              decoration:
-                  const InputDecoration(label: Text("Title")), //to add label
-              //we use decoration argument, and set it to InputDecoration &
-              //set label inside it
-            ),
-            Row(
-              children: [
-                Expanded(
-                  //we add expanded as textField tries to take as much space
-                  //as available on screen, so this will cause problems in a row.
-                  // same problem as row inside row or column inside column etc.
-                  child: TextField(
-                    controller: _amountController,
-                    maxLength: 10,
-                    keyboardType: TextInputType.number,
+    final keyboardSpace = MediaQuery.of(context).viewInsets.bottom;
+    //helps us get the UI elements that overlap our UI from bottom
+    return LayoutBuilder(builder: (ctx, constraints) {
+      final width = constraints.maxWidth;
+      final height = constraints.maxHeight; 
+      //we can use the layoutbuilder to get constraints of the parent widget instead of the 
+      //entire screen. This is useful when responsivness needs to be adjust in place where screen 
+      //has some other available space based on parent
+      return SizedBox(
+        height: double.infinity,
+        child: SingleChildScrollView(
+          child: Padding(
+              padding: EdgeInsets.fromLTRB(16, 16, 16, keyboardSpace + 16),
+              child: Column(
+                children: [
+                  // if(width>=600) //in flutter, between widgets you write if else without parentheses
+                  TextField(
+                    // A built in widget for text entry
+                    // onChanged: _saveTitleInput, //This is one way to save input text,
+                    // by calling onChanged each time the user enters a keystroke
+                    controller: _titleController,
+                    maxLength: 50,
                     decoration: const InputDecoration(
-                        prefixText: '\$',
-                        //adds a pre text to the field
-                        //(we are escaping the dollar with the backslash, as dollar is a special character)
-                        label: Text("Enter Amount")),
+                        label: Text("Title")), //to add label
+                    //we use decoration argument, and set it to InputDecoration &
+                    //set label inside it
                   ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                    child: Row(
-                  mainAxisAlignment: MainAxisAlignment
-                      .end, //sets where items start from along axis
-                  crossAxisAlignment:
-                      CrossAxisAlignment.center, // vertical centering
-                  children: [
-                    Text(_selectedDate == null
-                        ? "No Date Selected"
-                        : formatter.format(_selectedDate!)),
-                    //Here, we are setting text as No Date Selected if it is null,
-                    // else using formatted to show the selected date.
-                    // we use the exclamation mark to tell dart,
-                    // that the value won't be null (again use exclamation)
+                  // else //write else without parenthesis as well, because we are between a widget
+                  Row(
+                    children: [
+                      Expanded(
+                        //we add expanded as textField tries to take as much space
+                        //as available on screen, so this will cause problems in a row.
+                        // same problem as row inside row or column inside column etc.
+                        child: TextField(
+                          controller: _amountController,
+                          maxLength: 10,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                              prefixText: '\$',
+                              //adds a pre text to the field
+                              //(we are escaping the dollar with the backslash, as dollar is a special character)
+                              label: Text("Enter Amount")),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                          child: Row(
+                        mainAxisAlignment: MainAxisAlignment
+                            .end, //sets where items start from along axis
+                        crossAxisAlignment:
+                            CrossAxisAlignment.center, // vertical centering
+                        children: [
+                          Text(_selectedDate == null
+                              ? "No Date Selected"
+                              : formatter.format(_selectedDate!)),
+                          //Here, we are setting text as No Date Selected if it is null,
+                          // else using formatted to show the selected date.
+                          // we use the exclamation mark to tell dart,
+                          // that the value won't be null (again use exclamation)
 
-                    IconButton(
-                        onPressed: _presentDatePicker,
-                        icon: const Icon(Icons.date_range))
-                  ],
-                ))
-              ],
-            ),
-            Row(
-              children: [
-                DropdownButton(
-                    //to select a catergry
-                    value:
-                        _selectedCaterogy, //setting the initial value (changed later)
-                    items: Category.values
-                        .map(//items which are to be displayed
-                            (category) => DropdownMenuItem(
-                                value:
-                                    category, //this is the value that we send to onChanged
-                                child: Text(
-                                  category.name
-                                      .toUpperCase(), //name used to convert enum to string
-                                )))
-                        .toList(),
-                    //Drop downbutton expects a list of dropdownmenuitems.
-                    //We can convert list of one type to another via map.
-                    //use the map method again, to convert the Category.values which gives
-                    //us a list of our enum values, to values of DropdownmenuItem.
-                    //Map wants a function which will be executed for each item
-                    //The method recieves a value for each item in the original list, which
-                    //is simply catergory, (for each enum value) and the function will return a
-                    //drop down menu item. In the named argument for dropdownmenuitem, we set value
-                    //as catergory, child as text and call name method on catergory to get its value
-                    // We set the value as category, so that flutter knows what sort of value it is
-                    //dealing with when we press onChanged.
-                    onChanged: (value) {
-                      setState(() {
-                        //we set the state to show the current value if its changed
-                        if (value == null) {
-                          //ensuring value is not null
-                          return;
-                        }
-                        _selectedCaterogy = value;
-                      });
-                    }),
-                const Spacer(),
-                TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    }, //simply removes overlay from screen
-                    child: const Text("Close")),
-                ElevatedButton(
-                    onPressed: _submitExpenseData,
-                    child: const Text("Save Expense")),
-              ],
-            )
-          ],
-        ) //we use listview when we want scrollabilty
-        );
+                          IconButton(
+                              onPressed: _presentDatePicker,
+                              icon: const Icon(Icons.date_range))
+                        ],
+                      ))
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      DropdownButton(
+                          //to select a catergry
+                          value:
+                              _selectedCaterogy, //setting the initial value (changed later)
+                          items: Category.values
+                              .map(//items which are to be displayed
+                                  (category) => DropdownMenuItem(
+                                      value:
+                                          category, //this is the value that we send to onChanged
+                                      child: Text(
+                                        category.name
+                                            .toUpperCase(), //name used to convert enum to string
+                                      )))
+                              .toList(),
+                          //Drop downbutton expects a list of dropdownmenuitems.
+                          //We can convert list of one type to another via map.
+                          //use the map method again, to convert the Category.values which gives
+                          //us a list of our enum values, to values of DropdownmenuItem.
+                          //Map wants a function which will be executed for each item
+                          //The method recieves a value for each item in the original list, which
+                          //is simply catergory, (for each enum value) and the function will return a
+                          //drop down menu item. In the named argument for dropdownmenuitem, we set value
+                          //as catergory, child as text and call name method on catergory to get its value
+                          // We set the value as category, so that flutter knows what sort of value it is
+                          //dealing with when we press onChanged.
+                          onChanged: (value) {
+                            setState(() {
+                              //we set the state to show the current value if its changed
+                              if (value == null) {
+                                //ensuring value is not null
+                                return;
+                              }
+                              _selectedCaterogy = value;
+                            });
+                          }),
+                      const Spacer(),
+                      TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          }, //simply removes overlay from screen
+                          child: const Text("Close")),
+                      ElevatedButton(
+                          onPressed: _submitExpenseData,
+                          child: const Text("Save Expense")),
+                    ],
+                  )
+                ],
+              ) //we use listview when we want scrollabilty
+              ),
+        ),
+      );
+    });
   }
 }

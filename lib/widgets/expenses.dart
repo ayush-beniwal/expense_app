@@ -36,6 +36,7 @@ class _ExpensesState extends State<Expenses> {
 
   void _openAddExpenseOverlay() {
     showModalBottomSheet(
+        useSafeArea: true, //makes sure to only use area away from things like camera, notif bar etc
         isScrollControlled: true, //makes the modal full screen
         context: context,
         builder: (ctx) => NewExpense(onAddExpense: _addExpense));
@@ -60,7 +61,8 @@ class _ExpensesState extends State<Expenses> {
     setState(() {
       _registeredExpenses
           .remove(expense); //pass the expense which is to be removed as a value
-      ScaffoldMessenger.of(context).clearSnackBars(); //clears all other info messages before it
+      ScaffoldMessenger.of(context)
+          .clearSnackBars(); //clears all other info messages before it
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         //using scaffold Messenger's showSnackBar to show a snackbar of 3 s duraction
         duration: const Duration(seconds: 3),
@@ -80,6 +82,11 @@ class _ExpensesState extends State<Expenses> {
 
   @override
   Widget build(context) {
+    print(MediaQuery.of(context).size.width);
+    print(MediaQuery.of(context).size.height);
+    final width = MediaQuery.of(context).size.width;
+    final height = MediaQuery.of(context).size.height;
+    //storing width and height to use conditionals
     Widget mainContent = const Center(
       child: Text("Add expenses from the + button"),
     );
@@ -91,20 +98,30 @@ class _ExpensesState extends State<Expenses> {
     }
     //Using a build method
     return Scaffold(
-      //setting the appbar in scaffold
-      appBar: AppBar(title: const Text("Ayush's expense tracker"), actions: [
-        IconButton(
-            onPressed: _openAddExpenseOverlay, icon: const Icon(Icons.add))
-        //using actions: argumemnt (taking a list of widgets) and adding a
-        //icon button to it, which only has an icon
-      ]),
-      body: Column(
-        children: [
-          const Text('The chart'),
-          Expanded(child: mainContent) //use expanded
-          //whenever you use a column inside a column or a list
-        ],
-      ),
-    );
+        //setting the appbar in scaffold
+        appBar: AppBar(title: const Text("Ayush's expense tracker"), actions: [
+          IconButton(
+              onPressed: _openAddExpenseOverlay, icon: const Icon(Icons.add))
+          //using actions: argumemnt (taking a list of widgets) and adding a
+          //icon button to it, which only has an icon
+        ]),
+        body: width < 900 //checking width and executing based on that
+            ? Column(
+                children: [
+                  const Text('The chart'),
+                  Expanded(child: mainContent) //use expanded
+                  //whenever you use a column inside a column or a list
+                ],
+              )
+            : Row(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.all(30.0),
+                    child: Text('Landscape'),
+                  ),
+                  Expanded(child: mainContent) //use expanded
+                  //whenever you use a column inside a column or a list
+                ],
+              ));
   }
 }
